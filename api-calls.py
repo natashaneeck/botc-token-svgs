@@ -34,11 +34,11 @@ def find_chars(db):
                 params |= contDict
             
             response = requests.get(WIKI_API, params=params, headers=HEADERS).json()
-            if ("continue" not in response["query"]):
+            if ("continue" not in response):
                 shouldContinue = False
             else:
-                cmcontinueVals = response["query"]["continue"]["cmcontinue"]
-                continueVals = response["query"]["continue"]["continue"]
+                cmcontinueVals = response["continue"]["cmcontinue"]
+                continueVals = response["continue"]["continue"]
             
         
             for page in response["query"]["categorymembers"]:
@@ -89,8 +89,7 @@ def get_images(db):
         print("Found image for ", name)
         
         time.sleep(0.5)
-        
-    
+
     
 def update_db(db):
     find_chars(db)
@@ -101,6 +100,23 @@ def update_db(db):
     db.commit()
     get_images(db)
     db.commit()
+    
+def print_counts(db):
+    #for checking counts
+    tf = db.execute("""
+                    SELECT COUNT(*) FROM characters WHERE character_type = 'Townsfolk'
+                    """).fetchone()[0]
+    out = db.execute("""
+                    SELECT COUNT(*) FROM characters WHERE character_type = 'Outsiders'
+                    """).fetchone()[0]
+    mn = db.execute("""
+                    SELECT COUNT(*) FROM characters WHERE character_type = 'Minions'
+                    """).fetchone()[0]
+    dem = db.execute("""
+                    SELECT COUNT(*) FROM characters WHERE character_type = 'Demons'
+                    """).fetchone()[0]
+    
+    print(f"Number breakdown: {tf} Townsfolk, {out} Outsiders, {mn} Minions, {dem} Demons")
     
 
 def main():
@@ -116,6 +132,7 @@ def main():
                 """)
     db.commit()
     update_db(db)
+    print_counts(db)
     
 if __name__ == "__main__":
     main()
