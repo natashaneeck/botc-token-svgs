@@ -5,7 +5,6 @@ import time
 WIKI_API = "https://wiki.bloodontheclocktower.com/api.php"
 HEADERS = {"User-Agent": "BotCTokenMaker"}
 DB_PATH = "botc.db"
-IMAGE_DIR = "images"
 
 
 def find_chars(db):
