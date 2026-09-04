@@ -16,7 +16,6 @@ Install dependencies with pip or some similar package manager:
 Then run the api-calls.py file followed by the svgmaker.py file
 
 ### To do:
-- finalize fonts and appearance of svgs
-- make loop for svg creation
-- somehow put them all into one file (or in batches) for lasercutting on some size of wood board
+- finalize fonts
 - add support for custom inputs, like a spreadsheet organized with name, type, and link to icon
+- make some sort of better user experience like you input your board size and it does everything auto - include a question like "do you want to print all or just ones you havent before"
