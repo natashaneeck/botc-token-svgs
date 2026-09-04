@@ -56,7 +56,7 @@ def get_images(db):
     total_chars = db.execute("""
                              SELECT page_id, character_name 
                              FROM characters
-                             WHERE img_found IS NOT 1
+                             WHERE img_url IS NULL
                              """)
     
     for character in total_chars:
@@ -73,7 +73,7 @@ def get_images(db):
         chrpage = next(iter(response["query"]["pages"].values())) #get first val in pages list
         
         if chrpage is None or "missing" in chrpage:
-            print("Error accessing image on pageid %s and character name %s", id, name)
+            print(f"Error accessing image on pageid {id} and character name {name}")
             print(chrpage)
             continue
             
@@ -82,7 +82,7 @@ def get_images(db):
         
         db.execute("""
             UPDATE characters 
-            SET img_url = (?), img_found = 1
+            SET img_url = (?)
             WHERE page_id = (?)
             """, (imgurl, id)) 
         print("Found image for ", name)
@@ -125,8 +125,9 @@ def main():
                     character_name  TEXT,
                     character_type  TEXT,
                     printed         INTEGER DEFAULT 0,
-                    img_found       INTEGER DEFAULT 0,
-                    img_url         TEXT DEFAULT NULL
+                    svg_made        INTEGER DEFAULT 0,
+                    img_url         TEXT DEFAULT NULL,
+                    img_filepath    TEXT DEFAULT NULL
                     )
                 """)
     db.commit()
