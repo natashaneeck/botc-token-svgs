@@ -6,32 +6,37 @@ import urllib.request
 import numpy as np
 import base64
 
-DB_PATH = "botc.db"
-IMAGE_DIR = "images"
-SVG_DIR = "svgs"
+CUSTOM_DB_PATH = "custom.db"
+CUSTOM_IMAGE_DIR = "custom_images"
+CUSTOM_SVG_DIR = "custom_svgs"
+
+BASE_DB_PATH = "botc.db"
+BASE_IMAGE_DIR = "base_images"
+BASE_SVG_DIR = "base_svgs"
 FILE_SEPARATOR = os.path.sep
 TOKEN_SIZE = 2.0  # inches -- matches the circle's diameter
+TOKEN_BUFFER = 2.1
 
 def embed_fonts(dwg):
     dwg.embed_font("Franklin Gothic Book", "fonts/Franklin Gothic Book.ttf")
     dwg.embed_font("Franklin Gothic Demi Cond", "fonts/Franklin Gothic Demi Cond.ttf")
 
 def build_sheet(db, tokens, board_width_in, board_height_in, out_path):
-    cols = max(1, int(board_width_in // TOKEN_SIZE))
+    cols = max(1, int(board_width_in // TOKEN_BUFFER))
     dwg = svgwrite.Drawing(out_path, size=(f"{board_width_in}in", f"{board_height_in}in"), profile='full')
     # embed_fonts(dwg) bring back later
 
     placed = 0
     for i, (name, char_type, imgPath) in enumerate(tokens):
         col, row = i % cols, i // cols
-        x, y = col * TOKEN_SIZE, row * TOKEN_SIZE
-        if y + TOKEN_SIZE > board_height_in:
-            print(f"Board full after {placed} tokens ({cols} cols x {row} rows) — {placed} placed so far, start a new sheet for next {len(tokens) - placed}")
+        x, y = col * TOKEN_BUFFER, row * TOKEN_BUFFER
+        if y + TOKEN_BUFFER > board_height_in:
             break
         add_token(dwg, x, y, name, char_type, imgPath)
         placed += 1
         db.execute("UPDATE characters SET svg_made = 1 WHERE character_name = (?)", (name,))
 
+    print(f"Board completed after {placed} tokens ({cols} cols x {row} rows) — {placed} placed, {len(tokens) - placed} left")
     dwg.save()
     return placed
 
@@ -63,7 +68,7 @@ def add_token(dwg, x, y, name, char_type, imgPath):
     token.add(dwg.text(char_type, insert=("1in", "1.6982in"), fill="black", font_size="12pt",
                         font_family="Franklin Gothic Demi Cond", font_weight="bold", text_anchor="middle"))
     
-def greyscaleImg(db, name, imgUrl):
+def greyscaleImg(db, name, imgUrl, IMAGE_DIR):
     filename = f"{name.lower().replace(" ", "").replace("-", "").replace("'", "")}.png"
     finalpath = f"{IMAGE_DIR}{FILE_SEPARATOR}{filename}"
     
@@ -103,6 +108,18 @@ def remove_shadow(in_path, alpha_thresh=250):
 
 
 def main():
+    base = False
+
+    if base:
+        DB_PATH = BASE_DB_PATH
+        SVG_DIR = BASE_SVG_DIR
+        IMAGE_DIR = BASE_IMAGE_DIR
+    else:
+        DB_PATH = CUSTOM_DB_PATH
+        SVG_DIR = CUSTOM_SVG_DIR
+        IMAGE_DIR = CUSTOM_IMAGE_DIR
+
+
     db = sqlite3.connect(DB_PATH)
 
     to_greyscale = db.execute("""
@@ -113,7 +130,7 @@ def main():
         
     for character in to_greyscale:
         (name, url) = character
-        greyscaleImg(db, name, url)
+        greyscaleImg(db, name, url, IMAGE_DIR)
     db.commit()
 
     db.execute("UPDATE characters SET svg_made = 0")
