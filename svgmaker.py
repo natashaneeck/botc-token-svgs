@@ -13,15 +13,20 @@ CUSTOM_SVG_DIR = "custom_svgs"
 BASE_DB_PATH = "botc.db"
 BASE_IMAGE_DIR = "base_images"
 BASE_SVG_DIR = "base_svgs"
-FILE_SEPARATOR = os.path.sep
 TOKEN_SIZE = 2.0  # inches -- matches the circle's diameter
-TOKEN_BUFFER = 2.1
+TOKEN_BUFFER = TOKEN_SIZE + .1
 
 def embed_fonts(dwg):
     dwg.embed_font("Franklin Gothic Book", "fonts/Franklin Gothic Book.ttf")
     dwg.embed_font("Franklin Gothic Demi Cond", "fonts/Franklin Gothic Demi Cond.ttf")
 
+def ensure_dir(filepath):
+    d = os.path.dirname(filepath)
+    if d:
+        os.makedirs(d, exist_ok=True)
+
 def build_sheet(db, tokens, board_width_in, board_height_in, out_path):
+    ensure_dir(out_path)
     cols = max(1, int(board_width_in // TOKEN_BUFFER))
     dwg = svgwrite.Drawing(out_path, size=(f"{board_width_in}in", f"{board_height_in}in"), profile='full')
     # embed_fonts(dwg) bring back later
@@ -36,7 +41,8 @@ def build_sheet(db, tokens, board_width_in, board_height_in, out_path):
         placed += 1
         db.execute("UPDATE characters SET svg_made = 1 WHERE character_name = (?)", (name,))
 
-    print(f"Board completed after {placed} tokens ({cols} cols x {row} rows) — {placed} placed, {len(tokens) - placed} left")
+    rows_used = -(-placed // cols) if placed else 0
+    print(f"Board completed after {placed} tokens ({cols} cols x {rows_used} rows) — {placed} placed, {len(tokens) - placed} left")
     dwg.save()
     return placed
 
@@ -69,8 +75,9 @@ def add_token(dwg, x, y, name, char_type, imgPath):
                         font_family="Franklin Gothic Demi Cond", font_weight="bold", text_anchor="middle"))
     
 def greyscaleImg(db, name, imgUrl, IMAGE_DIR):
-    filename = f"{name.lower().replace(" ", "").replace("-", "").replace("'", "")}.png"
-    finalpath = f"{IMAGE_DIR}{FILE_SEPARATOR}{filename}"
+    filename = f"{name.lower().replace(" ", "").replace("-", "").replace("'", "").replace("\"", "")}.png"
+    finalpath = os.path.join(IMAGE_DIR, filename)
+    ensure_dir(finalpath)
     
     urllib.request.urlretrieve(imgUrl, finalpath)
     remove_shadow(finalpath).save(finalpath)
@@ -147,7 +154,7 @@ def main():
         if not to_tokenize:
             done = True
             break
-        build_sheet(db, to_tokenize, 24, 12, f"{SVG_DIR}{FILE_SEPARATOR}board_{board_count}.svg")
+        build_sheet(db, to_tokenize, 24, 12, os.path.join(SVG_DIR, f"board_{board_count}.svg"))
         db.commit()
         board_count += 1
     
