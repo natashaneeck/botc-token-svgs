@@ -8,7 +8,7 @@ DB_PATH = "botc.db"
 
 
 def find_chars(db):
-    typelist = {"Townsfolk", "Outsiders", "Minions", "Demons"}
+    typelist = {"Townsfolk", "Outsiders", "Minions", "Demons", "Travellers", "Fabled", "Loric"}
     
     
     # save each character
@@ -61,11 +61,16 @@ def get_images(db):
     
     for character in total_chars:
         (id, name) = character
+        #special exceptions to usual naming rules for images
+        if name.lower() == "big wig":
+            titles = "File:Icon_big_wig.png" #keeps the space for some reason
+        else:
+            titles = f"File:Icon_{name.lower().replace(" ", "").replace("-", "").replace("'", "").replace("(ugmode)", "")}.png"
         params = {"action" : "query",
                   "format" : "json",
                   "prop" : "imageinfo",
                   "iiprop" : "url",
-                  "titles" : f"File:Icon_{name.lower().replace(" ", "").replace("-", "").replace("'", "")}.png"}
+                  "titles" : titles}
         
         response = requests.get(WIKI_API, params=params, headers=HEADERS).json()
         
@@ -96,6 +101,11 @@ def update_db(db):
                DELETE FROM characters
                WHERE character_name = ?
                """, ("Qutler",))
+    db.execute("""
+                UPDATE characters 
+                SET character_name = (?)
+                WHERE character_name = (?)
+                """, ("God of Ug", "God of Ug (Ug Mode)")) 
     db.commit()
     get_images(db)
     db.commit()
@@ -114,8 +124,17 @@ def print_counts(db):
     dem = db.execute("""
                     SELECT COUNT(*) FROM characters WHERE character_type = 'Demons'
                     """).fetchone()[0]
+    trv = db.execute("""
+                    SELECT COUNT(*) FROM characters WHERE character_type = 'Travellers'
+                    """).fetchone()[0]
+    fab = db.execute("""
+                    SELECT COUNT(*) FROM characters WHERE character_type = 'Fabled'
+                    """).fetchone()[0]
+    lor = db.execute("""
+                    SELECT COUNT(*) FROM characters WHERE character_type = 'Loric'
+                    """).fetchone()[0]
     
-    print(f"Number breakdown: {tf} Townsfolk, {out} Outsiders, {mn} Minions, {dem} Demons")
+    print(f"Number breakdown: {tf} Townsfolk, {out} Outsiders, {mn} Minions, {dem} Demons, {trv} Travellers, {fab} Fabled, {lor} Loric")
     
 
 def main():
