@@ -1,29 +1,28 @@
+import base64
+import os
+import sqlite3
+import urllib.request
+
+import numpy as np
 import svgwrite
 from PIL import Image
-import sqlite3
-import os
-import urllib.request
-import numpy as np
-import base64
+
+from shared import (
+    BASE_DB_PATH,
+    BASE_IMAGE_DIR,
+    BASE_SVG_DIR,
+    TOKEN_BUFFER,
+    TOKEN_SIZE,
+    ensure_dir,
+)
 
 CUSTOM_DB_PATH = "custom.db"
 CUSTOM_IMAGE_DIR = "custom_images"
 CUSTOM_SVG_DIR = "custom_svgs"
 
-BASE_DB_PATH = "botc.db"
-BASE_IMAGE_DIR = "base_images"
-BASE_SVG_DIR = "base_svgs"
-TOKEN_SIZE = 2.0  # inches -- matches the circle's diameter
-TOKEN_BUFFER = TOKEN_SIZE + .1
-
 def embed_fonts(dwg):
     dwg.embed_font("Franklin Gothic Book", "fonts/Franklin Gothic Book.ttf")
     dwg.embed_font("Franklin Gothic Demi Cond", "fonts/Franklin Gothic Demi Cond.ttf")
-
-def ensure_dir(filepath):
-    d = os.path.dirname(filepath)
-    if d:
-        os.makedirs(d, exist_ok=True)
 
 def build_sheet(db, tokens, board_width_in, board_height_in, out_path):
     ensure_dir(out_path)
@@ -114,18 +113,24 @@ def remove_shadow(in_path, alpha_thresh=250):
     return Image.fromarray(out, 'RGBA')
 
 
-def main():
-    base = False
+def main(custom:bool = False, **kwargs):
 
-    if base:
+    if not custom:
         DB_PATH = BASE_DB_PATH
         SVG_DIR = BASE_SVG_DIR
         IMAGE_DIR = BASE_IMAGE_DIR
+    elif kwargs.get("script_name"):
+        script = kwargs.get("script_name")
+        DB_PATH = f"{script}.db"
+        SVG_DIR = f"{script}_svgs"
+        IMAGE_DIR = f"{script}_images"
     else:
         DB_PATH = CUSTOM_DB_PATH
         SVG_DIR = CUSTOM_SVG_DIR
         IMAGE_DIR = CUSTOM_IMAGE_DIR
 
+    width = kwargs.get("width", 24)
+    height = kwargs.get("height", 12)
 
     db = sqlite3.connect(DB_PATH)
 
@@ -140,7 +145,8 @@ def main():
         greyscaleImg(db, name, url, IMAGE_DIR)
     db.commit()
 
-    db.execute("UPDATE characters SET svg_made = 0")
+    if not kwargs.get("new_only"): #if arg DNE, then do all. if exists and says yes new only, then won't run
+        db.execute("UPDATE characters SET svg_made = 0")
 
     board_count = 1
     done = False
@@ -154,7 +160,10 @@ def main():
         if not to_tokenize:
             done = True
             break
-        build_sheet(db, to_tokenize, 24, 12, os.path.join(SVG_DIR, f"board_{board_count}.svg"))
+        if script:
+            build_sheet(db, to_tokenize, width, height, os.path.join(SVG_DIR, f"{script}_{board_count}.svg"))
+        else:
+            build_sheet(db, to_tokenize, width, height, os.path.join(SVG_DIR, f"board_{board_count}.svg"))
         db.commit()
         board_count += 1
     
