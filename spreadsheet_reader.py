@@ -1,10 +1,7 @@
-import pandas as pd
 import sqlite3
+
 import openpyxl
-
-
-SHARED_DB_PATH = "botc.db"
-SEPARATE_DB_PATH = "custom.db"
+import pandas as pd
 
 
 def read_xlsx(path):
@@ -26,8 +23,8 @@ def add_to_db(db, df):
         #print(name, type, url)
     db.commit()
 
-def main():
-    db = sqlite3.connect(SEPARATE_DB_PATH) # ask if want separate db, if so, ask for name of script for cleaner storage, assign SEPARATE_DB_PATH to that + .db, and use, otherwise SHARED_DB_PATH
+def main(filepath, script_name, xlsx:bool):
+    db = sqlite3.connect(f"{script_name}.db")
     db.execute("""CREATE TABLE IF NOT EXISTS characters (
                     page_id         INTEGER PRIMARY KEY,
                     character_name  TEXT,
@@ -40,7 +37,10 @@ def main():
                 """)
     db.commit()
 
-    df = read_xlsx("fall_of_rome.xlsx")
+    if xlsx:
+        df = read_xlsx(filepath)
+    else:
+        df = read_csv(filepath)
     add_to_db(db, df)
     
 if __name__ == "__main__":
