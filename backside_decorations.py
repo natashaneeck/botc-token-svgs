@@ -1,24 +1,19 @@
-import os
-import svgwrite
 import base64
+import os
+
+import svgwrite
+
+from shared import TOKEN_BUFFER, TOKEN_SIZE, ensure_dir
 
 CUSTOM_SVG_DIR = "custom_svgs"
-BASE_SVG_DIR = "base_svgs"
-TOKEN_SIZE = 2.0  # inches -- matches the circle's diameter
-TOKEN_BUFFER = TOKEN_SIZE + .1
 
-def ensure_dir(filepath):
-    d = os.path.dirname(filepath)
-    if d:
-        os.makedirs(d, exist_ok=True)
-
-def build_sheet(tokens, imgPath, board_width_in, board_height_in, out_path):
+def build_sheet(imgPath, board_width_in, board_height_in, out_path):
     ensure_dir(out_path)
     cols = max(1, int(board_width_in // TOKEN_BUFFER))
     dwg = svgwrite.Drawing(out_path, size=(f"{board_width_in}in", f"{board_height_in}in"), profile='full')
 
     placed = 0
-    for i in range(tokens):
+    for i in range(max(100, board_height_in / TOKEN_BUFFER * board_width_in / TOKEN_BUFFER)):
         col, row = i % cols, i // cols
         x = board_width_in - TOKEN_SIZE - (col * TOKEN_BUFFER)
         y = board_height_in - TOKEN_SIZE - (row * TOKEN_BUFFER)
@@ -51,19 +46,14 @@ def add_token(dwg, x, y, imgPath):
 
     
 
-def main():
-    base = False
+def main(**kwargs):
+    name = kwargs.get("name", "decorated_back")
+    width = kwargs.get("width", 24)
+    height = kwargs.get("height", 12)
+    decoration = kwargs.get("path", "basic_backside")
 
-    if base:
-        SVG_DIR = BASE_SVG_DIR
-    else:
-        SVG_DIR = CUSTOM_SVG_DIR
-
-    build_sheet(55, os.path.join("base_images", "amnesiac.png"), 24, 12, os.path.join(SVG_DIR, "decorated_back.svg"))
+    build_sheet(decoration, width, height, f"{name}.svg")
     
     
 if __name__ == "__main__":
     main()
-
-
-#Note: decoration file size should probably be a square 
