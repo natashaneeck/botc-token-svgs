@@ -6,21 +6,23 @@ Using the MediaWiki API, I store the token information in SQLite, and then use p
 
 ### How to Use
 
-Install dependencies with pip or some similar package manager:
-- requests
-- sqlite3
-- numpy
-- svgwrite
-- PIL (pillow)
-- openpyxl
+Create your virtual environment:  
+`python3.11 -m venv .venv`  
 
-Then run the api-calls.py file followed by the svgmaker.py file
+Install dependencies with pip or some similar package manager:
+`pip install -r requirements.txt`
+
+activate your virtual environment in Windows by:  
+`.\\.venv\\Scripts\\activate`
+
+in Linux by:  
+`source .venv/bin/activate`
+
+Then run main.py to complete the program in the terminal and follow the prompts
 
 ### To do:
 code only:
 - finalize fonts
-- make some sort of better user experience like you input your board size and it does everything auto - include a question like "do you want to print all or just ones you havent before"?
-- make requirements manager
 
 code and some manual:
 - figure out plans for reminder tokens - another spreadsheet, or get from json?
