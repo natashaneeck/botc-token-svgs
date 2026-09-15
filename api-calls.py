@@ -1,10 +1,12 @@
-import requests
 import sqlite3
 import time
 
+import requests
+
+from shared import BASE_DB_PATH
+
 WIKI_API = "https://wiki.bloodontheclocktower.com/api.php"
 HEADERS = {"User-Agent": "BotCTokenMaker"}
-DB_PATH = "botc.db"
 
 
 def find_chars(db):
@@ -138,7 +140,7 @@ def print_counts(db):
     
 
 def main():
-    db = sqlite3.connect(DB_PATH)
+    db = sqlite3.connect(BASE_DB_PATH)
     db.execute("""CREATE TABLE IF NOT EXISTS characters (
                     page_id         INTEGER PRIMARY KEY,
                     character_name  TEXT,
