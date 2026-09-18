@@ -13,16 +13,13 @@ from shared import (
     BASE_SVG_DIR,
     TOKEN_BUFFER,
     TOKEN_SIZE,
+    embed_fonts,
     ensure_dir,
 )
 
 CUSTOM_DB_PATH = "custom.db"
 CUSTOM_IMAGE_DIR = "custom_images"
 CUSTOM_SVG_DIR = "custom_svgs"
-
-def embed_fonts(dwg):
-    dwg.embed_font("Franklin Gothic Book", "fonts/Franklin Gothic Book.ttf")
-    dwg.embed_font("Franklin Gothic Demi Cond", "fonts/Franklin Gothic Demi Cond.ttf")
 
 def build_sheet(db, tokens, board_width_in, board_height_in, out_path):
     ensure_dir(out_path)
@@ -53,8 +50,8 @@ def add_token(dwg, x, y, name, char_type, imgPath):
         b64 = base64.b64encode(f.read()).decode("ascii")
     href = f"data:image/png;base64,{b64}"
 
-    img_size = 1.65
-    circle_center = 1.0
+    img_size = 1.55
+    circle_center = TOKEN_SIZE / 2
     nudge_up = 0.2 #increase this to move image higher up
     insert_x = circle_center - img_size / 2 #horizontally centering the image
     insert_y = circle_center - img_size / 2 - nudge_up #vertically centering the image and then moving it a bit up to avoid text overlap
@@ -114,13 +111,13 @@ def remove_shadow(in_path, alpha_thresh=250):
 
 
 def main(custom:bool = False, **kwargs):
+    script = kwargs.get("script_name")
 
     if not custom:
         DB_PATH = BASE_DB_PATH
         SVG_DIR = BASE_SVG_DIR
         IMAGE_DIR = BASE_IMAGE_DIR
     elif kwargs.get("script_name"):
-        script = kwargs.get("script_name")
         DB_PATH = f"{script}.db"
         SVG_DIR = f"{script}_svgs"
         IMAGE_DIR = f"{script}_images"
