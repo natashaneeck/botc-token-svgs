@@ -34,3 +34,4 @@ manual:
 - figure out other pieces needed like shrouds & info cards - shrouds can rest on top in a semicircle so they can be lasercut?
 - figure out token bag
 - do i have to get felt
+- dont forget the stand and clips for the grim
