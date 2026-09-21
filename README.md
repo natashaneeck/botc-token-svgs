@@ -24,14 +24,13 @@ Then run main.py to complete the program in the terminal and follow the prompts
 code only:
 - finalize fonts
 - add reminder tokens as an option in the terminal runner
-
-code and some manual:
-- figure out plans for reminder tokens - another spreadsheet, or get from json?
-    get from spreadsheet, and tokenize (skip inbetween db). use this for base3: https://www.scribd.com/document/929649954/BotC-Box-Contents and this for carousel: https://bloodontheclocktower.com/collections/carousel-reminder-tokens?page=7 
+- figure out plans for reminder tokens - get from spreadsheet
     handle multiple tokens with the same text and character
+- update token sizes
+- i forgot that i can make the .db files all the same one and just have different tables within. oops. fix that probably
 
 manual:
-- figure out boxes for storage, including the grim (LASER CUT BOX SVG GENERATORS EXIST!! I JUST NEED THE DIMENSIONS AND WOOD THICKNESS) - storage boxes may require some tinkering
+- figure out boxes for storage, including the grim (LASER CUT BOX SVG GENERATORS EXIST!! I JUST NEED THE DIMENSIONS AND WOOD THICKNESS) - [this one can do lids AND dividers](https://gravolab.pro/box-gen/)
 - figure out other pieces needed like shrouds & info cards - shrouds can rest on top in a semicircle so they can be lasercut?
 - figure out token bag
 - do i have to get felt
