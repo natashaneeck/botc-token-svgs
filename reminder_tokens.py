@@ -7,8 +7,8 @@ import svgwrite
 
 from shared import ensure_dir
 
-TOKEN_SIZE = 0.75
-TOKEN_BUFFER = TOKEN_SIZE + 0.1
+TOKEN_SIZE = 1.0
+TOKEN_BUFFER = TOKEN_SIZE + 0.05
 
 REMINDER_DIR = "reminder_tokens"
 
@@ -35,6 +35,24 @@ def build_sheet(db, tokens, board_width_in, board_height_in, out_path):
     dwg.save()
     return placed
 
+def wrap_text(text, max_len=14):
+    if len(text) <= max_len:
+        return [text]
+    words = text.split(" ")
+    if len(words) == 1:
+        mid = len(text) // 2
+        return [text[:mid], text[mid:]]
+    best_i, best_diff = 1, float("inf")
+    for i in range(1, len(words)):
+        l1 = " ".join(words[:i])
+        l2 = " ".join(words[i:])
+        diff = abs(len(l1) - len(l2))
+        if diff < best_diff:
+            best_diff = diff
+            best_i = i
+    return [" ".join(words[:best_i]), " ".join(words[best_i:])]
+
+
 def add_token(dwg, x, y, token_text, imgPath):
     token = dwg.svg(insert=(f"{x}in", f"{y}in"), size=(f"{TOKEN_SIZE}in", f"{TOKEN_SIZE}in"))
     dwg.add(token)
@@ -43,19 +61,29 @@ def add_token(dwg, x, y, token_text, imgPath):
         b64 = base64.b64encode(f.read()).decode("ascii")
     href = f"data:image/png;base64,{b64}"
 
-    img_size = 0.25
+    img_size = TOKEN_SIZE * 0.75
     center = TOKEN_SIZE / 2
-    nudge_up = 0.05 #increase this to move image higher up
-    insert_x = center - img_size / 2 #horizontally centering the image
-    insert_y = center - img_size / 2 - nudge_up #vertically centering the image and then moving it a bit up to avoid text overlap
+    nudge_up = 0.05
+    insert_x = center - img_size / 2
+    insert_y = center - img_size / 2 - nudge_up
+    text_y = TOKEN_SIZE * 0.75 + nudge_up
 
     img = dwg.image(href, insert=(f"{insert_x}in", f"{insert_y}in"), size=(f"{img_size}in", f"{img_size}in"))
     img.fit(horiz='center', vert='middle', scale='meet')
     token.add(img)
 
     token.add(dwg.circle(center=(f"{center}in", f"{center}in"), r=f"{center}in", fill="none", stroke="red", stroke_width="0.001in"))
-    token.add(dwg.text(token_text, insert=(f"{center}in", f"{TOKEN_SIZE - 0.05}in"), fill="black", font_size="6pt",
-                        font_family="Franklin Gothic Book", text_anchor="middle"))
+
+    lines = wrap_text(token_text, max_len=14)
+    line_height = 1.0  # em
+    first_dy = -((len(lines) - 1) * line_height) / 2  # shift block up so it stays centered on text_y
+
+    text_el = dwg.text("", insert=(f"{center}in", f"{text_y}in"), fill="black", font_size="6pt",
+                        font_family="Franklin Gothic Book", text_anchor="middle")
+    for i, line in enumerate(lines):
+        dy = f"{first_dy}em" if i == 0 else f"{line_height}em"
+        text_el.add(dwg.tspan(line, x=[f"{center}in"], dy=[dy]))
+    token.add(text_el)
 
 
 def main(img_db, spreadsheet = "base_and_carousel.xlsx", **kwargs):

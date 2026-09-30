@@ -4,7 +4,7 @@ import os
 BASE_DB_PATH = "botc.db"
 BASE_IMAGE_DIR = "base_images"
 BASE_SVG_DIR = "base_svgs"
-TOKEN_SIZE = 2.0  # inches -- matches the circle's diameter
+TOKEN_SIZE = 1.5 # inches -- matches the circle's diameter
 TOKEN_BUFFER = TOKEN_SIZE + .1
 
 #input helpers
@@ -50,3 +50,6 @@ def ensure_dir(filepath):
 def embed_fonts(dwg):
     dwg.embed_font("Franklin Gothic Book", "fonts/Franklin Gothic Book.ttf")
     dwg.embed_font("Franklin Gothic Demi Cond", "fonts/Franklin Gothic Demi Cond.ttf")
+    
+def normalize_name(name):
+    return name.lower().replace(' ', '').replace('-', '').replace(chr(39), '').replace('(ugmode)', '')

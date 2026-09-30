@@ -15,6 +15,7 @@ from shared import (
     TOKEN_SIZE,
     embed_fonts,
     ensure_dir,
+    normalize_name
 )
 
 CUSTOM_DB_PATH = "custom.db"
@@ -71,7 +72,7 @@ def add_token(dwg, x, y, name, char_type, imgPath):
                         font_family="Franklin Gothic Demi Cond", font_weight="bold", text_anchor="middle"))
     
 def greyscaleImg(db, name, imgUrl, IMAGE_DIR):
-    filename = f"{name.lower().replace(" ", "").replace("-", "").replace("'", "").replace("\"", "")}.png"
+    filename = f"{normalize_name(name)}.png"
     finalpath = os.path.join(IMAGE_DIR, filename)
     ensure_dir(finalpath)
     

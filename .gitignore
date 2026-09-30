@@ -1,3 +1,5 @@
-botc.db
+*.db
 *.png
 *.svg
+*.venv
+*.pyc

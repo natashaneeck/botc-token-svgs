@@ -3,7 +3,7 @@ import time
 
 import requests
 
-from shared import BASE_DB_PATH
+from shared import BASE_DB_PATH, normalize_name
 
 WIKI_API = "https://wiki.bloodontheclocktower.com/api.php"
 HEADERS = {"User-Agent": "BotCTokenMaker"}
@@ -67,7 +67,7 @@ def get_images(db):
         if name.lower() == "big wig":
             titles = "File:Icon_big_wig.png" #keeps the space for some reason
         else:
-            titles = f"File:Icon_{name.lower().replace(" ", "").replace("-", "").replace("'", "").replace("(ugmode)", "")}.png"
+            titles = f"File:Icon_{normalize_name(name)}.png"
         params = {"action" : "query",
                   "format" : "json",
                   "prop" : "imageinfo",

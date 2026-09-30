@@ -21,17 +21,22 @@ in Linux by:
 Then run main.py to complete the program in the terminal and follow the prompts
 
 ### To do:
+non urgent:
+- i forgot that i can make the .db files all the same one and just have different tables within. oops. fix that probably
+- add reminder tokens as an option in the terminal runner
+- put things into organized folders and fix imports and filepaths so it all still works
+
 code only:
 - finalize fonts
-- add reminder tokens as an option in the terminal runner
-- figure out plans for reminder tokens - get from spreadsheet
-    handle multiple tokens with the same text and character
-- update token sizes
-- i forgot that i can make the .db files all the same one and just have different tables within. oops. fix that probably
+- update token sizes to be more dynamic and work with the 1.5 diameter norm
 
 manual:
 - figure out boxes for storage, including the grim (LASER CUT BOX SVG GENERATORS EXIST!! I JUST NEED THE DIMENSIONS AND WOOD THICKNESS) - [this one can do lids AND dividers](https://gravolab.pro/box-gen/)
-- figure out other pieces needed like shrouds & info cards - shrouds can rest on top in a semicircle so they can be lasercut?
-- figure out token bag
-- do i have to get felt
-- dont forget the stand and clips for the grim
+- finish info cards
+- dont forget the stand for the grim - model off of canvas stand designs?
+- backside image for tokens, with 1/2 inch felt taken into account
+- fancy designs for box ideally
+
+created:
+death shrouds
+half of info cards
