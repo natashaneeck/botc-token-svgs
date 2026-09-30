@@ -25,10 +25,10 @@ non urgent:
 - i forgot that i can make the .db files all the same one and just have different tables within. oops. fix that probably
 - add reminder tokens as an option in the terminal runner
 - put things into organized folders and fix imports and filepaths so it all still works
+- be able to print things by script through main.py
 
 code only:
 - finalize fonts
-- update token sizes to be more dynamic and work with the 1.5 diameter norm
 
 manual:
 - figure out boxes for storage, including the grim (LASER CUT BOX SVG GENERATORS EXIST!! I JUST NEED THE DIMENSIONS AND WOOD THICKNESS) - [this one can do lids AND dividers](https://gravolab.pro/box-gen/)

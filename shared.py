@@ -7,6 +7,16 @@ BASE_SVG_DIR = "base_svgs"
 TOKEN_SIZE = 1.5 # inches -- matches the circle's diameter
 TOKEN_BUFFER = TOKEN_SIZE + .1
 
+KNOWN_SCRIPTS = {
+    "Trouble Brewing",
+    "Bad Moon Rising",
+    "Sects & Violets",
+    "Experimental Characters",
+    "Custom",
+    "Travellers",
+    "Fabled",
+}
+
 #input helpers
 def yes_no(question):
     yes_options = ["y", "yes"]

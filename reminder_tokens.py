@@ -86,8 +86,8 @@ def add_token(dwg, x, y, token_text, imgPath):
     token.add(text_el)
 
 
-def main(img_db, spreadsheet = "base_and_carousel.xlsx", **kwargs):
-    script = kwargs.get("script_name", "board")
+def main(img_db = "botc.db", spreadsheet = "base_and_carousel.xlsx", **kwargs):
+    script_name = kwargs.get("script_name", "board")
     width = kwargs.get("width", 24)
     height = kwargs.get("height", 12)
 
@@ -97,7 +97,8 @@ def main(img_db, spreadsheet = "base_and_carousel.xlsx", **kwargs):
                     character_name  TEXT,
                     token_text      TEXT,
                     svg_made        INTEGER DEFAULT 0,
-                    img_filepath    TEXT DEFAULT NULL
+                    img_filepath    TEXT DEFAULT NULL,
+                    script          TEXT DEFAULT NULL
                     )
                 """)
     db.commit()
@@ -109,42 +110,51 @@ def main(img_db, spreadsheet = "base_and_carousel.xlsx", **kwargs):
     for row in range(df.shape[0]):
         name = df.at[row, "Name"]
         result = img_db.execute("""
-                        SELECT img_filepath 
+                        SELECT img_filepath, script 
                         FROM characters
                         WHERE character_name IS ?
                         """, (name,)).fetchone()
         if result is None:
-            print(f"No image found for {name}, skipping")
+            print(f"No entry found for {name}, skipping")
             continue
 
         img = result[0]
+        script = result[1]
 
         token_cols = [c for c in df.columns if c == "Token" or c.startswith("Token.")]
         for col in token_cols:
             token_text = df.at[row, col]
             if pd.isna(token_text):
                 continue   # character just has fewer than the max number of tokens
-            db.execute("INSERT INTO reminder_tokens (character_name, token_text, img_filepath) VALUES (?, ?, ?)",
-                    (name, token_text, img))
+            db.execute("INSERT INTO reminder_tokens (character_name, token_text, img_filepath, script) VALUES (?, ?, ?, ?)",
+                    (name, token_text, img, script))
     db.commit()
 
-
+    db.execute("UPDATE reminder_tokens SET svg_made = 0")
     board_count = 1
     done = False
     while not done:
-        to_tokenize = db.execute("""
-                                SELECT id, token_text, img_filepath
-                                FROM reminder_tokens
-                                WHERE svg_made IS 0 AND img_filepath IS NOT NULL
-                                """).fetchall()
+        if script_name != "board":
+            to_tokenize = db.execute("""
+                                    SELECT id, token_text, img_filepath
+                                    FROM reminder_tokens
+                                    WHERE svg_made IS 0 AND img_filepath IS NOT NULL AND script IS (?)
+                                    """, (script_name,)).fetchall()
+        else:
+            to_tokenize = db.execute("""
+                                    SELECT id, token_text, img_filepath
+                                    FROM reminder_tokens
+                                    WHERE svg_made IS 0 AND img_filepath IS NOT NULL
+                                    """).fetchall()
         if not to_tokenize:
             done = True
             break
-        build_sheet(db, to_tokenize, width, height, os.path.join(REMINDER_DIR, f"{script}_{board_count}.svg"))
+        build_sheet(db, to_tokenize, width, height, os.path.join(REMINDER_DIR, f"{script_name}_{board_count}.svg"))
         db.commit()
         board_count += 1
     
     
 if __name__ == "__main__":
-    main("botc.db")
+    #main("botc.db")
+    main("botc.db", script_name="Trouble Brewing")
 

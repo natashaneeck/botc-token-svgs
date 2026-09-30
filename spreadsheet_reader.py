@@ -32,9 +32,10 @@ def main(filepath, script_name, xlsx:bool):
                     printed         INTEGER DEFAULT 0,
                     svg_made        INTEGER DEFAULT 0,
                     img_url         TEXT DEFAULT NULL,
-                    img_filepath    TEXT DEFAULT NULL
+                    img_filepath    TEXT DEFAULT NULL,
+                    script          TEXT DEFAULT (?)
                     )
-                """)
+                """, (script_name,))
     db.commit()
 
     if xlsx:

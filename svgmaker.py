@@ -22,6 +22,14 @@ CUSTOM_DB_PATH = "custom.db"
 CUSTOM_IMAGE_DIR = "custom_images"
 CUSTOM_SVG_DIR = "custom_svgs"
 
+# Ratios from the values that worked at TOKEN_SIZE = 2in so that we can actually do dynamic scaling now
+IMG_SIZE_RATIO = 1.55 / 2          # 0.775
+NUDGE_UP_RATIO = 0.2 / 2           # 0.1
+NAME_Y_RATIO = 1.51 / 2            # 0.755
+TYPE_Y_RATIO = 1.6982 / 2          # 0.8491
+NAME_FONT_PT_PER_IN = 16 / 2       # 8pt per inch of token size
+TYPE_FONT_PT_PER_IN = 12 / 2       # 6pt per inch of token size
+
 def build_sheet(db, tokens, board_width_in, board_height_in, out_path):
     ensure_dir(out_path)
     cols = max(1, int(board_width_in // TOKEN_BUFFER))
@@ -51,9 +59,9 @@ def add_token(dwg, x, y, name, char_type, imgPath):
         b64 = base64.b64encode(f.read()).decode("ascii")
     href = f"data:image/png;base64,{b64}"
 
-    img_size = 1.55
+    img_size = TOKEN_SIZE * IMG_SIZE_RATIO
     circle_center = TOKEN_SIZE / 2
-    nudge_up = 0.2 #increase this to move image higher up
+    nudge_up = TOKEN_SIZE * NUDGE_UP_RATIO #increase this to move image higher up
     insert_x = circle_center - img_size / 2 #horizontally centering the image
     insert_y = circle_center - img_size / 2 - nudge_up #vertically centering the image and then moving it a bit up to avoid text overlap
 
@@ -65,10 +73,10 @@ def add_token(dwg, x, y, name, char_type, imgPath):
     img.fit(horiz='center', vert='middle', scale='meet')
     token.add(img)
 
-    token.add(dwg.circle(center=("1in", "1in"), r="1in", fill="none", stroke="red", stroke_width="0.001in"))
-    token.add(dwg.text(name, insert=("1in", "1.51in"), fill="black", font_size="16pt",
+    token.add(dwg.circle(center=(f"{circle_center}in", f"{circle_center}in"), r=f"{circle_center}in", fill="none", stroke="red", stroke_width="0.001in"))
+    token.add(dwg.text(name, insert=(f"{circle_center}in", f"{TOKEN_SIZE * NAME_Y_RATIO}in"), fill="black", font_size=f"{TOKEN_SIZE * NAME_FONT_PT_PER_IN}pt",
                         font_family="Franklin Gothic Book", text_anchor="middle"))
-    token.add(dwg.text(char_type, insert=("1in", "1.6982in"), fill="black", font_size="12pt",
+    token.add(dwg.text(char_type, insert=(f"{circle_center}in", f"{TOKEN_SIZE * TYPE_Y_RATIO}in"), fill="black", font_size=f"{TOKEN_SIZE * TYPE_FONT_PT_PER_IN}pt",
                         font_family="Franklin Gothic Demi Cond", font_weight="bold", text_anchor="middle"))
     
 def greyscaleImg(db, name, imgUrl, IMAGE_DIR):
@@ -149,11 +157,18 @@ def main(custom:bool = False, **kwargs):
     board_count = 1
     done = False
     while not done:
-        to_tokenize = db.execute("""
-                                SELECT character_name, character_type, img_filepath 
-                                FROM characters
-                                WHERE svg_made IS 0 AND img_filepath IS NOT NULL
-                                """).fetchall()
+        if script:
+            to_tokenize = db.execute("""
+                                    SELECT character_name, character_type, img_filepath 
+                                    FROM characters
+                                    WHERE svg_made IS 0 AND img_filepath IS NOT NULL AND script is (?)
+                                    """, (script,)).fetchall()
+        else:
+            to_tokenize = db.execute("""
+                                    SELECT character_name, character_type, img_filepath 
+                                    FROM characters
+                                    WHERE svg_made IS 0 AND img_filepath IS NOT NULL
+                                    """).fetchall()
 
         if not to_tokenize:
             done = True
@@ -167,4 +182,5 @@ def main(custom:bool = False, **kwargs):
     
     
 if __name__ == "__main__":
-    main()
+    #main()
+    main(False, script_name="Trouble Brewing")
